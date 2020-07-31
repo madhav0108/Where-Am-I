@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MapKit
 import CoreLocation
 
 class ViewController: UIViewController, CLLocationManagerDelegate {
@@ -18,7 +19,24 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     @IBOutlet weak var altitudeLabel: UILabel!
     @IBOutlet weak var addressLabel: UILabel!
     
+    @IBOutlet weak var mapViewBtn: UIButton!
+    @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var closeMapBtn: UIButton!
+    
+    @IBAction func mapBtnPressed(_ sender: Any) {
+        mapView.isHidden = false
+        closeMapBtn.isHidden = false
+        mapView.updateFocusIfNeeded()
+        centerViewOnUserLocation()
+        manager.startUpdatingLocation()
+    }
+    @IBAction func closeBtnPressed(_ sender: Any) {
+        mapView.isHidden = true
+        closeMapBtn.isHidden = true
+    }
+    
     var manager = CLLocationManager()
+    let regionInMeters: Double = 150000
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,10 +71,14 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         addressLabel.layer.cornerRadius = 5.0
         addressLabel.layer.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0.1996735873)
         
+        mapView.showsUserLocation = true
+        mapView.updateFocusIfNeeded()
+        
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBest
         manager.requestWhenInUseAuthorization()
         manager.startUpdatingLocation()
+        mapView.updateFocusIfNeeded()
         
         // Do any additional setup after loading the view.
     }
@@ -124,9 +146,14 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                 }
             }
         }
-        
     }
-
-
+    
+    func centerViewOnUserLocation() {
+        if let location = manager.location?.coordinate {
+            let region = MKCoordinateRegion.init(center: location, latitudinalMeters: regionInMeters, longitudinalMeters: regionInMeters)
+            mapView.setRegion(region, animated: true)
+        }
+    }
+    
 }
 
